@@ -1,0 +1,6 @@
+triton triton-lang/triton 1887644bdea84fde07825813158782fa526871fd
+luminal luminal-ai/luminal 1cbb9173dc53482bb6d87463aea2f1cfd94a1cf1
+egglog egraphs-good/egglog 6c3a0c910247f616e6d17b2c3923a757948a7841
+egglogpy egraphs-good/egglog-python 22bfc5a7f22733537d32940472a9c46af59f4459
+pytorch pytorch/pytorch fbab7cc90f5699714d5785aaa2f153c739435d6f
+puzzles srush/Triton-Puzzles 4d794abed02292081500ebf4b1e35cd5fc5fb019

@@ -1,0 +1,8 @@
+__pycache__/
+.pytest_cache/
+.venv/
+*.pyc
+build/sources/files/
+hints/*.png
+.print_index.html
+.DS_Store
