@@ -240,7 +240,7 @@ td:first-child code { white-space: nowrap; }
   <nav class="qnav"><a href="#t1_ir_anatomy-1">① 一张总表</a><a href="#t1_ir_anatomy-2">② TTIR：只有“块级计算”</a><a href="#t1_ir_anatomy-3">③ TTGIR：分工表出现了</a><a href="#t1_ir_anatomy-4">④ LLVM IR 和 PTX：每个线程自己的指令</a><a href="#t1_ir_anatomy-5">⑤ concept_diff 的结果</a><a href="#t1_ir_anatomy-6">⑥ 几个正则的细节</a><a href="#t1_ir_anatomy-7">⑦ 源码与资料索引</a><a href="#t1_ir_anatomy-8">⑧ 自测</a></nav>
 </section>
 
-<div class="callout info"><div class="callout-title">怎么读这一页</div><p>对照 <a class="src" href="../solutions/t1_ir_anatomy.py" title="solutions/t1_ir_anatomy.py" target="_blank" rel="noopener"><span class="src-repo">drills</span>t1_ir_anatomy.py</a> 和 <code>fixtures/t1/</code> 下的五个文件。fixture 按真实 Triton 输出的格式整理并做了删减（省略了大部分地址计算），关键结构保留。</p>
+<div class="callout info"><div class="callout-title">怎么读这一页</div><p>对照 <a class="src" href="https://github.com/kzhou003/ai-compiler-drills/blob/d0dbd7ee5d121a4792f90ab8f2e5684c33df607c/solutions/t1_ir_anatomy.py" title="kzhou003/ai-compiler-drills @ d0dbd7e · solutions/t1_ir_anatomy.py" target="_blank" rel="noopener"><span class="src-repo">drills</span>t1_ir_anatomy.py</a> 和 <code>fixtures/t1/</code> 下的五个文件。fixture 按真实 Triton 输出的格式整理并做了删减（省略了大部分地址计算），关键结构保留。</p>
 </div>
 <h3 id="t1_ir_anatomy-1">① 一张总表</h3>
 <div class="table-wrap"><table>
@@ -279,7 +279,7 @@ td:first-child code { white-space: nowrap; }
 </tr>
 </tbody>
 </table></div>
-<p><a class="src" href="../solutions/t1_ir_anatomy.py" title="solutions/t1_ir_anatomy.py" target="_blank" rel="noopener"><span class="src-repo">drills</span>detect_stage（19–33 行）</a> 从低层往高层判断：PTX 和 LLVM IR 的特征最不会误判；TTGIR 必须先于 TTIR 判断，因为 TTGIR 里也有 <code>tt.func</code>。</p>
+<p><a class="src" href="https://github.com/kzhou003/ai-compiler-drills/blob/d0dbd7ee5d121a4792f90ab8f2e5684c33df607c/solutions/t1_ir_anatomy.py#L19-L33" title="kzhou003/ai-compiler-drills @ d0dbd7e · solutions/t1_ir_anatomy.py" target="_blank" rel="noopener"><span class="src-repo">drills</span>detect_stage（19–33 行）</a> 从低层往高层判断：PTX 和 LLVM IR 的特征最不会误判；TTGIR 必须先于 TTIR 判断，因为 TTGIR 里也有 <code>tt.func</code>。</p>
 <h3 id="t1_ir_anatomy-2">② TTIR：只有“块级计算”</h3>
 <pre><code class="language-text">%res:3 = scf.for %iv = %c0_i32 to %c128_i32 step %c32_i32 iter_args(%acc = %cst, %pa = %3, %pb = %4) -&gt; (...)
   %a = tt.load %pa : tensor&lt;64x32x!tt.ptr&lt;f16&gt;&gt;          ← 一整块指针，一次 load 一整块
@@ -307,9 +307,9 @@ td:first-child code { white-space: nowrap; }
 %30 = ... asm sideeffect &quot;ldmatrix.sync.aligned.m8n8.x4.shared.b16 {$0, $1, $2, $3}, [$4];&quot; (ptr addrspace(3) %29)
 %40 = ... asm sideeffect &quot;mma.sync.aligned.m16n8k16.row.col.f32.f16.f16.f32 {$0, $1, $2, $3}, ...&quot;
 </code></pre>
-<p>Triton 在 LLVM IR 里用 inline asm 发出 MMA，所以 <a class="src" href="../solutions/t1_ir_anatomy.py" title="solutions/t1_ir_anatomy.py" target="_blank" rel="noopener"><span class="src-repo">drills</span>ptx_instructions / mma_shape（101–122 行）</a> 对 LLVM IR 和 PTX 用的是同一组正则。<code>m16n8k16</code>：一条指令由整个 warp 合作完成，A 是 16×16、B 是 16×8，累加到 16×8 的 fp32；<code>row.col</code> 表示 A 行主序、B 列主序；<code>.f32.f16.f16.f32</code> 依次是 D、A、B、C 的类型。</p>
+<p>Triton 在 LLVM IR 里用 inline asm 发出 MMA，所以 <a class="src" href="https://github.com/kzhou003/ai-compiler-drills/blob/d0dbd7ee5d121a4792f90ab8f2e5684c33df607c/solutions/t1_ir_anatomy.py#L101-L122" title="kzhou003/ai-compiler-drills @ d0dbd7e · solutions/t1_ir_anatomy.py" target="_blank" rel="noopener"><span class="src-repo">drills</span>ptx_instructions / mma_shape（101–122 行）</a> 对 LLVM IR 和 PTX 用的是同一组正则。<code>m16n8k16</code>：一条指令由整个 warp 合作完成，A 是 16×16、B 是 16×8，累加到 16×8 的 fp32；<code>row.col</code> 表示 A 行主序、B 列主序；<code>.f32.f16.f16.f32</code> 依次是 D、A、B、C 的类型。</p>
 <h3 id="t1_ir_anatomy-5">⑤ concept_diff 的结果</h3>
-<p><a class="src" href="../solutions/t1_ir_anatomy.py" title="solutions/t1_ir_anatomy.py" target="_blank" rel="noopener"><span class="src-repo">drills</span>CONCEPTS / concepts / concept_diff（126–151 行）</a> 对四个 fixture 算出：</p>
+<p><a class="src" href="https://github.com/kzhou003/ai-compiler-drills/blob/d0dbd7ee5d121a4792f90ab8f2e5684c33df607c/solutions/t1_ir_anatomy.py#L126-L151" title="kzhou003/ai-compiler-drills @ d0dbd7e · solutions/t1_ir_anatomy.py" target="_blank" rel="noopener"><span class="src-repo">drills</span>CONCEPTS / concepts / concept_diff（126–151 行）</a> 对四个 fixture 算出：</p>
 <div class="table-wrap"><table>
 <thead>
 <tr>
@@ -339,7 +339,7 @@ td:first-child code { white-space: nowrap; }
 <p>这张表就是 roadmap 要的“IR 注释版”的骨架。</p>
 <h3 id="t1_ir_anatomy-6">⑥ 几个正则的细节</h3>
 <ul>
-<li><code>_OP</code>（<a class="src" href="../solutions/t1_ir_anatomy.py" title="solutions/t1_ir_anatomy.py" target="_blank" rel="noopener"><span class="src-repo">drills</span>33 行</a>）：左边可能是 <code>%9 = </code>、<code>%res:2 = </code>、<code>%a, %b = </code>；op 名可能带引号（generic 形式 <code>&quot;tt.reduce&quot;(...)</code>）；op 名后面跟空白、括号、<code>{</code>、<code>&lt;</code> 或行尾。</li>
+<li><code>_OP</code>（<a class="src" href="https://github.com/kzhou003/ai-compiler-drills/blob/d0dbd7ee5d121a4792f90ab8f2e5684c33df607c/solutions/t1_ir_anatomy.py#L33" title="kzhou003/ai-compiler-drills @ d0dbd7e · solutions/t1_ir_anatomy.py" target="_blank" rel="noopener"><span class="src-repo">drills</span>33 行</a>）：左边可能是 <code>%9 = </code>、<code>%res:2 = </code>、<code>%a, %b = </code>；op 名可能带引号（generic 形式 <code>&quot;tt.reduce&quot;(...)</code>）；op 名后面跟空白、括号、<code>{</code>、<code>&lt;</code> 或行尾。</li>
 <li><code>layout_aliases</code>：<code>#smem = #ttg.shared_memory</code> 没有 <code>&lt;{...}&gt;</code>，所以 body 部分是可选的。</li>
 <li><code>_encoding_of</code>：<code>tensor&lt;64x32xf16, #ttg.dot_op&lt;{opIdx = 0, parent = #mma, kWidth = 2}&gt;&gt;</code> 里 encoding 本身含逗号，只能按<strong>第一个</strong>逗号切。</li>
 </ul>

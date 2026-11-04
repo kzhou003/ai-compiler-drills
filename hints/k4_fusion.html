@@ -240,10 +240,10 @@ td:first-child code { white-space: nowrap; }
   <nav class="qnav"><a href="#k4_fusion-1">① 四种切法，一张表</a><a href="#k4_fusion-2">② 时间估计：roofline + launch + spill 惩罚</a><a href="#k4_fusion-3">③ 融合会输的例子</a><a href="#k4_fusion-4">④ 两个项目里的同一件事</a><a href="#k4_fusion-5">⑤ 源码与资料索引</a><a href="#k4_fusion-6">⑥ 自测</a></nav>
 </section>
 
-<div class="callout info"><div class="callout-title">怎么读这一页</div><p>对照 <a class="src" href="../solutions/k4_fusion.py" title="solutions/k4_fusion.py" target="_blank" rel="noopener"><span class="src-repo">drills</span>k4_fusion.py</a>。<code>Stage</code> 描述一个算子：写多少元素、从链外读多少元素（权重、bias、residual）、多少 FLOPs、融合时占多少寄存器。</p>
+<div class="callout info"><div class="callout-title">怎么读这一页</div><p>对照 <a class="src" href="https://github.com/kzhou003/ai-compiler-drills/blob/d0dbd7ee5d121a4792f90ab8f2e5684c33df607c/solutions/k4_fusion.py" title="kzhou003/ai-compiler-drills @ d0dbd7e · solutions/k4_fusion.py" target="_blank" rel="noopener"><span class="src-repo">drills</span>k4_fusion.py</a>。<code>Stage</code> 描述一个算子：写多少元素、从链外读多少元素（权重、bias、residual）、多少 FLOPs、融合时占多少寄存器。</p>
 </div>
 <h3 id="k4_fusion-1">① 四种切法，一张表</h3>
-<p><code>chain_mlp_epilogue(4096, 4096, 4096)</code>，fp16，MN = 4096² = 16.8 M 元素（<a class="src" href="../solutions/k4_fusion.py" title="solutions/k4_fusion.py" target="_blank" rel="noopener"><span class="src-repo">drills</span>traffic（41–50 行）</a>）：</p>
+<p><code>chain_mlp_epilogue(4096, 4096, 4096)</code>，fp16，MN = 4096² = 16.8 M 元素（<a class="src" href="https://github.com/kzhou003/ai-compiler-drills/blob/d0dbd7ee5d121a4792f90ab8f2e5684c33df607c/solutions/k4_fusion.py#L41-L50" title="kzhou003/ai-compiler-drills @ d0dbd7e · solutions/k4_fusion.py" target="_blank" rel="noopener"><span class="src-repo">drills</span>traffic（41–50 行）</a>）：</p>
 <div class="table-wrap"><table>
 <thead>
 <tr>
@@ -292,7 +292,7 @@ td:first-child code { white-space: nowrap; }
 <div class="callout analogy"><div class="callout-title">类比 · 流水线上的半成品</div><p>不融合像一条每道工序之间都要入库的流水线：切好的零件放回仓库，下一道工序再出库。融合是把几道工序放在同一个工位上连续做完，只入库一次。但工位的台面（寄存器）有限：工序越多，台面上同时摊开的半成品越多，放不下就得临时堆到地上（spill），来回弯腰反而更慢。</p>
 </div>
 <h3 id="k4_fusion-2">② 时间估计：roofline + launch + spill 惩罚</h3>
-<p><a class="src" href="../solutions/k4_fusion.py" title="solutions/k4_fusion.py" target="_blank" rel="noopener"><span class="src-repo">drills</span>time_estimate（53–66 行）</a> 每段算 <code>max(访存, 计算) + launch</code>；寄存器超过 255 时访存时间乘 <code>spill_penalty</code>。<a class="src" href="../solutions/k4_fusion.py" title="solutions/k4_fusion.py" target="_blank" rel="noopener"><span class="src-repo">drills</span>best_plan（69–82 行）</a> 用一个 n−1 位掩码枚举全部 2ⁿ⁻¹ 种切法（4 个 stage 是 8 种）。</p>
+<p><a class="src" href="https://github.com/kzhou003/ai-compiler-drills/blob/d0dbd7ee5d121a4792f90ab8f2e5684c33df607c/solutions/k4_fusion.py#L53-L66" title="kzhou003/ai-compiler-drills @ d0dbd7e · solutions/k4_fusion.py" target="_blank" rel="noopener"><span class="src-repo">drills</span>time_estimate（53–66 行）</a> 每段算 <code>max(访存, 计算) + launch</code>；寄存器超过 255 时访存时间乘 <code>spill_penalty</code>。<a class="src" href="https://github.com/kzhou003/ai-compiler-drills/blob/d0dbd7ee5d121a4792f90ab8f2e5684c33df607c/solutions/k4_fusion.py#L69-L82" title="kzhou003/ai-compiler-drills @ d0dbd7e · solutions/k4_fusion.py" target="_blank" rel="noopener"><span class="src-repo">drills</span>best_plan（69–82 行）</a> 用一个 n−1 位掩码枚举全部 2ⁿ⁻¹ 种切法（4 个 stage 是 8 种）。</p>
 <p>4096³ 的例子里最优是 <code>[4]</code>（约 3.45 ms，几乎全是 GEMM 的计算时间）；16×4096×4096 的 decode 形状最优也是 <code>[4]</code>，但原因不同：那里省下的主要是 launch。</p>
 <h3 id="k4_fusion-3">③ 融合会输的例子</h3>
 <pre><code class="language-text">heavy = [Stage(&quot;a&quot;, n, n, n, live_regs=200), Stage(&quot;b&quot;, n, 0, n, live_regs=100)]    n = 2^26

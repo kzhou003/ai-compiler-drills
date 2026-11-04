@@ -240,7 +240,7 @@ td:first-child code { white-space: nowrap; }
   <nav class="qnav"><a href="#l4_plan_trace-1">① 输入：DAG 和 buffer 的使用点</a><a href="#l4_plan_trace-2">② precedes：每一个使用都在前面</a><a href="#l4_plan_trace-3">③ first fit：按请求顺序放</a><a href="#l4_plan_trace-4">④ 为什么是 DAG 可达性，而不是时间线</a><a href="#l4_plan_trace-5">⑤ 四个阶段</a><a href="#l4_plan_trace-6">⑥ 源码与资料索引</a><a href="#l4_plan_trace-7">⑦ 自测</a></nav>
 </section>
 
-<div class="callout info"><div class="callout-title">怎么读这一页</div><p>对照 <a class="src" href="../solutions/l4_plan_trace.py" title="solutions/l4_plan_trace.py" target="_blank" rel="noopener"><span class="src-repo">drills</span>l4_plan_trace.py</a> 和 <a class="src" href="https://github.com/luminal-ai/luminal/blob/1cbb9173dc53482bb6d87463aea2f1cfd94a1cf1/src/buffer/arena.rs#L43" title="luminal-ai/luminal @ 1cbb917 · src/buffer/arena.rs" target="_blank" rel="noopener"><span class="src-repo">luminal</span>src/buffer/arena.rs 的 plan_slab</a>。M=64、K=256、N=64、fp32。</p>
+<div class="callout info"><div class="callout-title">怎么读这一页</div><p>对照 <a class="src" href="https://github.com/kzhou003/ai-compiler-drills/blob/d0dbd7ee5d121a4792f90ab8f2e5684c33df607c/solutions/l4_plan_trace.py" title="kzhou003/ai-compiler-drills @ d0dbd7e · solutions/l4_plan_trace.py" target="_blank" rel="noopener"><span class="src-repo">drills</span>l4_plan_trace.py</a> 和 <a class="src" href="https://github.com/luminal-ai/luminal/blob/1cbb9173dc53482bb6d87463aea2f1cfd94a1cf1/src/buffer/arena.rs#L43" title="luminal-ai/luminal @ 1cbb917 · src/buffer/arena.rs" target="_blank" rel="noopener"><span class="src-repo">luminal</span>src/buffer/arena.rs 的 plan_slab</a>。M=64、K=256、N=64、fp32。</p>
 </div>
 <h3 id="l4_plan_trace-1">① 输入：DAG 和 buffer 的使用点</h3>
 <pre><code class="language-text">upload → lt_matmul → add_bias → relu → readback
@@ -300,7 +300,7 @@ td:first-child code { white-space: nowrap; }
 </tbody>
 </table></div>
 <h3 id="l4_plan_trace-2">② precedes：每一个使用都在前面</h3>
-<p><a class="src" href="../solutions/l4_plan_trace.py" title="solutions/l4_plan_trace.py" target="_blank" rel="noopener"><span class="src-repo">drills</span>reachability（46–55 行）</a> 倒着拓扑序求闭包：<code>after[lt_matmul] = {add_bias, relu, readback}</code>。<code>precedes(a, b)</code> 要求 a 的<strong>每个</strong>使用都能到达 b 的<strong>每个</strong>使用：</p>
+<p><a class="src" href="https://github.com/kzhou003/ai-compiler-drills/blob/d0dbd7ee5d121a4792f90ab8f2e5684c33df607c/solutions/l4_plan_trace.py#L46-L55" title="kzhou003/ai-compiler-drills @ d0dbd7e · solutions/l4_plan_trace.py" target="_blank" rel="noopener"><span class="src-repo">drills</span>reachability（46–55 行）</a> 倒着拓扑序求闭包：<code>after[lt_matmul] = {add_bias, relu, readback}</code>。<code>precedes(a, b)</code> 要求 a 的<strong>每个</strong>使用都能到达 b 的<strong>每个</strong>使用：</p>
 <div class="table-wrap"><table>
 <thead>
 <tr>
@@ -333,7 +333,7 @@ td:first-child code { white-space: nowrap; }
 </tbody>
 </table></div>
 <h3 id="l4_plan_trace-3">③ first fit：按请求顺序放</h3>
-<p><a class="src" href="../solutions/l4_plan_trace.py" title="solutions/l4_plan_trace.py" target="_blank" rel="noopener"><span class="src-repo">drills</span>plan_slab（62–81 行）</a>，与 Rust 版的循环一一对应：</p>
+<p><a class="src" href="https://github.com/kzhou003/ai-compiler-drills/blob/d0dbd7ee5d121a4792f90ab8f2e5684c33df607c/solutions/l4_plan_trace.py#L62-L81" title="kzhou003/ai-compiler-drills @ d0dbd7e · solutions/l4_plan_trace.py" target="_blank" rel="noopener"><span class="src-repo">drills</span>plan_slab（62–81 行）</a>，与 Rust 版的循环一一对应：</p>
 <div class="table-wrap"><table>
 <thead>
 <tr>
@@ -396,7 +396,7 @@ td:first-child code { white-space: nowrap; }
 
 <figure class="flow"><div class="flow-head">菱形 DAG：b、c 可能并行<span class="flow-hint">悬停节点查看连接</span></div><div class="flow-body" data-flow="{&quot;title&quot;: &quot;菱形 DAG：b、c 可能并行&quot;, &quot;nodes&quot;: [{&quot;id&quot;: &quot;a&quot;, &quot;c&quot;: 0.0, &quot;r&quot;: 0.6, &quot;t&quot;: &quot;a&quot;, &quot;s&quot;: &quot;&quot;, &quot;k&quot;: &quot;acc&quot;, &quot;w&quot;: 0.6}, {&quot;id&quot;: &quot;b&quot;, &quot;c&quot;: 1.0, &quot;r&quot;: 0.0, &quot;t&quot;: &quot;b · 用 p&quot;, &quot;s&quot;: &quot;&quot;, &quot;k&quot;: &quot;warn&quot;, &quot;w&quot;: 1.0}, {&quot;id&quot;: &quot;c&quot;, &quot;c&quot;: 1.0, &quot;r&quot;: 1.2, &quot;t&quot;: &quot;c · 用 q&quot;, &quot;s&quot;: &quot;&quot;, &quot;k&quot;: &quot;warn&quot;, &quot;w&quot;: 1.0}, {&quot;id&quot;: &quot;d&quot;, &quot;c&quot;: 2.0, &quot;r&quot;: 0.6, &quot;t&quot;: &quot;d · 用 r&quot;, &quot;s&quot;: &quot;&quot;, &quot;k&quot;: &quot;pass&quot;, &quot;w&quot;: 1.0}], &quot;edges&quot;: [{&quot;a&quot;: &quot;a&quot;, &quot;b&quot;: &quot;b&quot;, &quot;t&quot;: &quot;&quot;, &quot;k&quot;: &quot;&quot;, &quot;anim&quot;: false, &quot;dash&quot;: false}, {&quot;a&quot;: &quot;a&quot;, &quot;b&quot;: &quot;c&quot;, &quot;t&quot;: &quot;&quot;, &quot;k&quot;: &quot;&quot;, &quot;anim&quot;: false, &quot;dash&quot;: false}, {&quot;a&quot;: &quot;b&quot;, &quot;b&quot;: &quot;d&quot;, &quot;t&quot;: &quot;&quot;, &quot;k&quot;: &quot;&quot;, &quot;anim&quot;: false, &quot;dash&quot;: false}, {&quot;a&quot;: &quot;c&quot;, &quot;b&quot;: &quot;d&quot;, &quot;t&quot;: &quot;&quot;, &quot;k&quot;: &quot;&quot;, &quot;anim&quot;: false, &quot;dash&quot;: false}], &quot;groups&quot;: [], &quot;cfg&quot;: {&quot;cw&quot;: 180.0, &quot;nw&quot;: 150.0}}"></div><figcaption>p 和 q 互不先后 → 不同地址；r 在 b、c 之后 → 可以复用 p 的位置（offset 0）。</figcaption></figure>
 <h3 id="l4_plan_trace-5">⑤ 四个阶段</h3>
-<p><a class="src" href="../solutions/l4_plan_trace.py" title="solutions/l4_plan_trace.py" target="_blank" rel="noopener"><span class="src-repo">drills</span>phase_breakdown / achieved（141–156 行）</a>：测试的例子里 graph_compile 0.4 s、search 3.0 s、prepare 0.1 s、两次 execute 各 0.5 ms——search 占 85.7%。这就是为什么 L3 要算 break-even，也是为什么 README 把 <code>LUMINAL_CUDA_PROFILE_RECAPTURE</code> 描述为“decomposing TTFT/TPOT into kernel time vs. runtime overhead”的工具。</p>
+<p><a class="src" href="https://github.com/kzhou003/ai-compiler-drills/blob/d0dbd7ee5d121a4792f90ab8f2e5684c33df607c/solutions/l4_plan_trace.py#L141-L156" title="kzhou003/ai-compiler-drills @ d0dbd7e · solutions/l4_plan_trace.py" target="_blank" rel="noopener"><span class="src-repo">drills</span>phase_breakdown / achieved（141–156 行）</a>：测试的例子里 graph_compile 0.4 s、search 3.0 s、prepare 0.1 s、两次 execute 各 0.5 ms——search 占 85.7%。这就是为什么 L3 要算 break-even，也是为什么 README 把 <code>LUMINAL_CUDA_PROFILE_RECAPTURE</code> 描述为“decomposing TTFT/TPOT into kernel time vs. runtime overhead”的工具。</p>
 <p><code>achieved(2·64·64·256, 10 µs, 40 TFLOP/s)</code> = 0.21 TFLOP/s，峰值的 0.5%：小 GEMM 是 launch-bound，和 K1 的 roofline 一致。</p>
 <h3 id="l4_plan_trace-6">⑥ 源码与资料索引</h3>
 <ul>

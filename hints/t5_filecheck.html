@@ -240,7 +240,7 @@ td:first-child code { white-space: nowrap; }
   <nav class="qnav"><a href="#t5_filecheck-1">① 一次完整的匹配</a><a href="#t5_filecheck-2">② compile_pattern：三种片段</a><a href="#t5_filecheck-3">③ NEXT / SAME：行边界</a><a href="#t5_filecheck-4">④ DAG 与 COUNT</a><a href="#t5_filecheck-5">⑤ 变量的作用域</a><a href="#t5_filecheck-6">⑥ 在 Triton 仓库里：读、改、写</a><a href="#t5_filecheck-7">⑦ 源码与资料索引</a><a href="#t5_filecheck-8">⑧ 自测</a></nav>
 </section>
 
-<div class="callout info"><div class="callout-title">怎么读这一页</div><p>对照 <a class="src" href="../solutions/t5_filecheck.py" title="solutions/t5_filecheck.py" target="_blank" rel="noopener"><span class="src-repo">drills</span>t5_filecheck.py</a>，以及测试文件里的 <code>OUT</code>（一个 <code>@transpose</code> 函数和一个 <code>@other</code> 函数）。</p>
+<div class="callout info"><div class="callout-title">怎么读这一页</div><p>对照 <a class="src" href="https://github.com/kzhou003/ai-compiler-drills/blob/d0dbd7ee5d121a4792f90ab8f2e5684c33df607c/solutions/t5_filecheck.py" title="kzhou003/ai-compiler-drills @ d0dbd7e · solutions/t5_filecheck.py" target="_blank" rel="noopener"><span class="src-repo">drills</span>t5_filecheck.py</a>，以及测试文件里的 <code>OUT</code>（一个 <code>@transpose</code> 函数和一个 <code>@other</code> 函数）。</p>
 </div>
 <h3 id="t5_filecheck-1">① 一次完整的匹配</h3>
 <p>检查串（来自 <code>test_real_coalesce_style_checks_pass</code>）：</p>
@@ -319,7 +319,7 @@ td:first-child code { white-space: nowrap; }
 <div class="callout analogy"><div class="callout-title">类比 · 读书时用书签</div><p>pos 是一枚书签：每找到一条 CHECK，书签就夹到那里，下一条只能往后翻。NOT 像“这两枚书签之间不许出现某个词”——你得先放好下一枚书签，才知道要检查哪一段。LABEL 像章节：先把每一章的起点都找出来，每条 CHECK 只能在自己那一章里翻。</p>
 </div>
 <h3 id="t5_filecheck-2">② compile_pattern：三种片段</h3>
-<p><a class="src" href="../solutions/t5_filecheck.py" title="solutions/t5_filecheck.py" target="_blank" rel="noopener"><span class="src-repo">drills</span>compile_pattern（46–74 行）</a> 逐字符扫描：</p>
+<p><a class="src" href="https://github.com/kzhou003/ai-compiler-drills/blob/d0dbd7ee5d121a4792f90ab8f2e5684c33df607c/solutions/t5_filecheck.py#L46-L74" title="kzhou003/ai-compiler-drills @ d0dbd7e · solutions/t5_filecheck.py" target="_blank" rel="noopener"><span class="src-repo">drills</span>compile_pattern（46–74 行）</a> 逐字符扫描：</p>
 <div class="table-wrap"><table>
 <thead>
 <tr>
@@ -358,11 +358,11 @@ td:first-child code { white-space: nowrap; }
 </table></div>
 <p>一个容易忽略的细节：<code>[[row:#.*]]</code> 里的 <code>.*</code> 是贪婪的，但它后面紧跟着字面的 <code> = #ttg.blocked&lt;{</code>，正则会回溯到正确的位置，<code>row</code> 最后只是 <code>#blocked</code>。</p>
 <h3 id="t5_filecheck-3">③ NEXT / SAME：行边界</h3>
-<p><a class="src" href="../solutions/t5_filecheck.py" title="solutions/t5_filecheck.py" target="_blank" rel="noopener"><span class="src-repo">drills</span>_line_bounds（86–89 行）</a> 给出某个位置所在行的 <code>[start, end)</code>。SAME 在“上一个匹配的末尾 … 行尾”里搜；NEXT 在“上一个匹配所在行的下一行”里搜。测试 <code>CHECK: tt.func @transpose</code> + <code>CHECK-NEXT: tt.load</code> 会失败：func 的下一行是 <code>convert_layout</code>。</p>
+<p><a class="src" href="https://github.com/kzhou003/ai-compiler-drills/blob/d0dbd7ee5d121a4792f90ab8f2e5684c33df607c/solutions/t5_filecheck.py#L86-L89" title="kzhou003/ai-compiler-drills @ d0dbd7e · solutions/t5_filecheck.py" target="_blank" rel="noopener"><span class="src-repo">drills</span>_line_bounds（86–89 行）</a> 给出某个位置所在行的 <code>[start, end)</code>。SAME 在“上一个匹配的末尾 … 行尾”里搜；NEXT 在“上一个匹配所在行的下一行”里搜。测试 <code>CHECK: tt.func @transpose</code> + <code>CHECK-NEXT: tt.load</code> 会失败：func 的下一行是 <code>convert_layout</code>。</p>
 <h3 id="t5_filecheck-4">④ DAG 与 COUNT</h3>
 <ul>
 <li>DAG：一组连续的 <code>CHECK-DAG</code> 各自从同一个 pos 开始找，但已经被组内别的 DAG 用掉的区间不能再用；整组结束后 pos 跳到组内最靠后的匹配末尾。<code>CHECK-DAG: tt.store</code> + <code>CHECK-DAG: tt.load</code> 能过，换成普通 CHECK 就不行。</li>
-<li>COUNT-n：<code>parse_checks</code> 直接把它展开成 n 条普通 CHECK（<a class="src" href="../solutions/t5_filecheck.py" title="solutions/t5_filecheck.py" target="_blank" rel="noopener"><span class="src-repo">drills</span>parse_checks（29–43 行）</a>）。真 FileCheck 的语义稍严格（n 次连续匹配，不允许中间夹别的 CHECK），对 Triton 测试的用法来说等价。</li>
+<li>COUNT-n：<code>parse_checks</code> 直接把它展开成 n 条普通 CHECK（<a class="src" href="https://github.com/kzhou003/ai-compiler-drills/blob/d0dbd7ee5d121a4792f90ab8f2e5684c33df607c/solutions/t5_filecheck.py#L29-L43" title="kzhou003/ai-compiler-drills @ d0dbd7e · solutions/t5_filecheck.py" target="_blank" rel="noopener"><span class="src-repo">drills</span>parse_checks（29–43 行）</a>）。真 FileCheck 的语义稍严格（n 次连续匹配，不允许中间夹别的 CHECK），对 Triton 测试的用法来说等价。</li>
 </ul>
 <h3 id="t5_filecheck-5">⑤ 变量的作用域</h3>
 <p>默认情况下变量在整个文件里有效；<code>--enable-var-scope</code> 时，普通变量在每个 LABEL 处清空，只有 <code>$</code> 开头的全局变量保留。<strong>Triton 默认打开了它</strong>：<a class="src" href="https://github.com/triton-lang/triton/blob/1887644bdea84fde07825813158782fa526871fd/test/lit.cfg.py#L48" title="triton-lang/triton @ 1887644 · test/lit.cfg.py" target="_blank" rel="noopener"><span class="src-repo">triton</span>test/lit.cfg.py</a> 里设置了 <code>FILECHECK_OPTS=--enable-var-scope</code>（“enabled by default in MLIR test”）。所以 accelerate-matmul.mlir 在文件头捕获 layout 时写成 <code>[[$MMA:.+]]</code>（这个文件里有 72 处 <code>[[$</code>），否则进入第一个 <code>CHECK-LABEL</code> 块后变量就失效了。写新测试时忘了 <code>$</code> 是很常见的失败原因；测试 <code>test_var_scope</code> 演示的就是这一点。</p>

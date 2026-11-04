@@ -240,7 +240,7 @@ td:first-child code { white-space: nowrap; }
   <nav class="qnav"><a href="#l3_search-1">① 空间与真值</a><a href="#l3_search-2">② GA：best-so-far 曲线</a><a href="#l3_search-3">③ rank_insert：和 Rust 版逐行对照</a><a href="#l3_search-4">④ 代理成本：方向对，细节错</a><a href="#l3_search-5">⑤ finalists：验证和排名分开</a><a href="#l3_search-6">⑥ break-even</a><a href="#l3_search-7">⑦ 源码与资料索引</a><a href="#l3_search-8">⑧ 自测</a></nav>
 </section>
 
-<div class="callout info"><div class="callout-title">怎么读这一页</div><p>对照 <a class="src" href="../solutions/l3_search.py" title="solutions/l3_search.py" target="_blank" rel="noopener"><span class="src-repo">drills</span>l3_search.py</a>。“实测”来自 <code>mlp_measure()</code>：一个确定的延迟表（<a class="src" href="../solutions/l3_search.py" title="solutions/l3_search.py" target="_blank" rel="noopener"><span class="src-repo">drills</span>142–169 行</a>），模拟真实 GPU 上那些代理成本看不见的效应。</p>
+<div class="callout info"><div class="callout-title">怎么读这一页</div><p>对照 <a class="src" href="https://github.com/kzhou003/ai-compiler-drills/blob/d0dbd7ee5d121a4792f90ab8f2e5684c33df607c/solutions/l3_search.py" title="kzhou003/ai-compiler-drills @ d0dbd7e · solutions/l3_search.py" target="_blank" rel="noopener"><span class="src-repo">drills</span>l3_search.py</a>。“实测”来自 <code>mlp_measure()</code>：一个确定的延迟表（<a class="src" href="https://github.com/kzhou003/ai-compiler-drills/blob/d0dbd7ee5d121a4792f90ab8f2e5684c33df607c/solutions/l3_search.py#L142-L169" title="kzhou003/ai-compiler-drills @ d0dbd7e · solutions/l3_search.py" target="_blank" rel="noopener"><span class="src-repo">drills</span>142–169 行</a>），模拟真实 GPU 上那些代理成本看不见的效应。</p>
 </div>
 <h3 id="l3_search-1">① 空间与真值</h3>
 <p>genome = 四个 e-class 各选一个实现：matmul（primitive_loop / tiled_kernel / cublaslt）× epilogue（separate / fused）× w_layout（row / col）× accumulate（fp32 / fp16），共 24 个。按实测排序的前几名：</p>
@@ -300,7 +300,7 @@ td:first-child code { white-space: nowrap; }
 </table></div>
 <p><code>w_layout</code> 对 cuBLASLt 没有影响，所以每一行实际是两个 genome。</p>
 <h3 id="l3_search-2">② GA：best-so-far 曲线</h3>
-<p><a class="src" href="../solutions/l3_search.py" title="solutions/l3_search.py" target="_blank" rel="noopener"><span class="src-repo">drills</span>genetic_search（60–87 行）</a>，<code>budget=10, seed=0</code> 的曲线：</p>
+<p><a class="src" href="https://github.com/kzhou003/ai-compiler-drills/blob/d0dbd7ee5d121a4792f90ab8f2e5684c33df607c/solutions/l3_search.py#L60-L87" title="kzhou003/ai-compiler-drills @ d0dbd7e · solutions/l3_search.py" target="_blank" rel="noopener"><span class="src-repo">drills</span>genetic_search（60–87 行）</a>，<code>budget=10, seed=0</code> 的曲线：</p>
 <pre><code class="language-text">测量序号:  1     2    3    4    5    6   7   8   9   10
 best ns : 2422  127  117  117  117  95  95  95  95  95
 </code></pre>
@@ -312,7 +312,7 @@ best ns : 2422  127  117  117  117  95  95  95  95  95
 <thead>
 <tr>
 <th>Rust（<a class="src" href="https://github.com/luminal-ai/luminal/blob/1cbb9173dc53482bb6d87463aea2f1cfd94a1cf1/crates/luminal_cuda_lite/src/search.rs#L251" title="luminal-ai/luminal @ 1cbb917 · crates/luminal_cuda_lite/src/search.rs" target="_blank" rel="noopener"><span class="src-repo">luminal</span>search.rs</a>）</th>
-<th>Python（<a class="src" href="../solutions/l3_search.py" title="solutions/l3_search.py" target="_blank" rel="noopener"><span class="src-repo">drills</span>50–57 行</a>）</th>
+<th>Python（<a class="src" href="https://github.com/kzhou003/ai-compiler-drills/blob/d0dbd7ee5d121a4792f90ab8f2e5684c33df607c/solutions/l3_search.py#L50-L57" title="kzhou003/ai-compiler-drills @ d0dbd7e · solutions/l3_search.py" target="_blank" rel="noopener"><span class="src-repo">drills</span>50–57 行</a>）</th>
 </tr>
 </thead>
 <tbody>
@@ -338,10 +338,10 @@ best ns : 2422  127  117  117  117  95  95  95  95  95
 <div class="callout analogy"><div class="callout-title">类比 · 看菜单点菜</div><p>代理成本像看菜单上的价格估计哪道菜好吃：贵的大概不差，但两道同价的菜哪道更合口味，菜单说不出来。实测是真的尝一口。finalists 是“厨房说这道菜今天做不了”：排第一的不能做，就上第二道。只尝菜单上最便宜的三道，可能三道都恰好今天做不了。</p>
 </div>
 <h3 id="l3_search-5">⑤ finalists：验证和排名分开</h3>
-<p><a class="src" href="../solutions/l3_search.py" title="solutions/l3_search.py" target="_blank" rel="noopener"><span class="src-repo">drills</span>select_finalist（122–131 行）</a> 对 GA 的 ranked <code>[95 fp16, 95 fp16, 103 fp32, 103 fp32]</code>：第 1、2 名被拒（fp16 累加，K = 256 超出容差），第 3 名通过 → <code>(3, 103, {...fp32...}, [(1, ...), (2, ...)])</code>。</p>
+<p><a class="src" href="https://github.com/kzhou003/ai-compiler-drills/blob/d0dbd7ee5d121a4792f90ab8f2e5684c33df607c/solutions/l3_search.py#L122-L131" title="kzhou003/ai-compiler-drills @ d0dbd7e · solutions/l3_search.py" target="_blank" rel="noopener"><span class="src-repo">drills</span>select_finalist（122–131 行）</a> 对 GA 的 ranked <code>[95 fp16, 95 fp16, 103 fp32, 103 fp32]</code>：第 1、2 名被拒（fp16 累加，K = 256 超出容差），第 3 名通过 → <code>(3, 103, {...fp32...}, [(1, ...), (2, ...)])</code>。</p>
 <p>真实的 <a class="src" href="https://github.com/luminal-ai/luminal/blob/1cbb9173dc53482bb6d87463aea2f1cfd94a1cf1/crates/luminal_cuda_lite/src/finalists.rs#L16" title="luminal-ai/luminal @ 1cbb917 · crates/luminal_cuda_lite/src/finalists.rs" target="_blank" rel="noopener"><span class="src-repo">luminal</span>PendingFinalist</a>：<code>rank</code> 是 1-based 的 GA 排名，<code>metric</code> 是实测纳秒，<code>arena.slab_bytes</code> 是这个候选的设备内存高水位；“A rejected candidate advances the walk to the next measured rank”。本题的 <code>mlp_validate</code> 也包含内存检查：primitive_loop 的 <code>[M, N, K]</code> 中间结果超过预算就拒绝（L1 算过它有多大，L4 会算出 slab）。</p>
 <h3 id="l3_search-6">⑥ break-even</h3>
-<p><a class="src" href="../solutions/l3_search.py" title="solutions/l3_search.py" target="_blank" rel="noopener"><span class="src-repo">drills</span>break_even_runs（134–139 行）</a>：多花 1.9 s 搜索，每次执行省 30 ns，要执行 1.9 / 30e-9 ≈ 6300 万次才回本。对一个要服务上亿 token 的推理模型这很划算；对一次性的小脚本则不值得。这就是 search trade-off 报告的结论该有的样子。</p>
+<p><a class="src" href="https://github.com/kzhou003/ai-compiler-drills/blob/d0dbd7ee5d121a4792f90ab8f2e5684c33df607c/solutions/l3_search.py#L134-L139" title="kzhou003/ai-compiler-drills @ d0dbd7e · solutions/l3_search.py" target="_blank" rel="noopener"><span class="src-repo">drills</span>break_even_runs（134–139 行）</a>：多花 1.9 s 搜索，每次执行省 30 ns，要执行 1.9 / 30e-9 ≈ 6300 万次才回本。对一个要服务上亿 token 的推理模型这很划算；对一次性的小脚本则不值得。这就是 search trade-off 报告的结论该有的样子。</p>
 <h3 id="l3_search-7">⑦ 源码与资料索引</h3>
 <ul>
 <li><a class="src" href="https://github.com/luminal-ai/luminal/blob/1cbb9173dc53482bb6d87463aea2f1cfd94a1cf1/src/extraction.rs#L555" title="luminal-ai/luminal @ 1cbb917 · src/extraction.rs" target="_blank" rel="noopener"><span class="src-repo">luminal</span>Genome</a> · <a class="src" href="https://github.com/luminal-ai/luminal/blob/1cbb9173dc53482bb6d87463aea2f1cfd94a1cf1/src/extraction.rs#L667" title="luminal-ai/luminal @ 1cbb917 · src/extraction.rs" target="_blank" rel="noopener"><span class="src-repo">luminal</span>SamplingSpace</a> · <a class="src" href="https://github.com/luminal-ai/luminal/blob/1cbb9173dc53482bb6d87463aea2f1cfd94a1cf1/src/extraction.rs#L866" title="luminal-ai/luminal @ 1cbb917 · src/extraction.rs" target="_blank" rel="noopener"><span class="src-repo">luminal</span>plan_fingerprint</a></li>
